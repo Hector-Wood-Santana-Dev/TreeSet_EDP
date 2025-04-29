@@ -1,4 +1,22 @@
-# Implementación del árbol rojo-negro en python
+# Implementación del nodo de un árbol rojo-negro en python 
+class Node:
+    def __init__(self, key, color, left=None, right=None, parent=None):
+        self.key = key
+        self.color = color  # 'RED' or 'BLACK'
+        self.left = left
+        self.right = right
+        self.parent = parent
+
+class TreeSet:
+    def __init__(self):
+        self.TNULL = Node(None, 'BLACK') # Nodo Sentinela
+        self.root = self.TNULL
+
+    def insertar(self, key):
+        
+
+# Implementación del TreeSet usando un árbol rojo-negro en python
+'''
 class treeset:
 
     def __init__(self):
@@ -61,3 +79,4 @@ class treeset:
     def size(self):
         return size
   
+'''
