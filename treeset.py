@@ -18,61 +18,60 @@ class TreeSet:
         if collection:
             for item in collection:
                 self.add(item)
-
     # Rotación a la izquierda; Único del árbol Rojo-Negro
-    def _left_rotate(self, x):
-        y = x.right
-        x.right = y.left
-        if y.left != self.NIL:
-            y.left.parent = x
-        y.parent = x.parent
-        if x.parent is None:
-            self.root = y
-        elif x == x.parent.left:
-            x.parent.left = y
+    def _left_rotate(self, son):
+        father = son.right
+        son.right = father.left
+        if father.left != self.NIL:
+            father.left.parent = son
+        father.parent = son.parent
+        if son.parent is None:
+            self.root = father
+        elif son == son.parent.left:
+            son.parent.left = father
         else:
-            x.parent.right = y
-        y.left = x
-        x.parent = y
+            son.parent.right = father
+        father.left = son
+        son.parent = father
 
     # Rotación a la derecha; Único del árbol Rojo-Negro
-    def _right_rotate(self, y):
-        x = y.left
-        y.left = x.right
-        if x.right != self.NIL:
-            x.right.parent = y
-        x.parent = y.parent
-        if y.parent is None:
-            self.root = x
-        elif y == y.parent.right:
-            y.parent.right = x
+    def _right_rotate(self, father):
+        son = father.left
+        father.left = son.right
+        if son.right != self.NIL:
+            son.right.parent = father
+        son.parent = father.parent
+        if father.parent is None:
+            self.root = son
+        elif father == father.parent.right:
+            father.parent.right = son
         else:
-            y.parent.left = x
-        x.right = y
-        y.parent = x
+            father.parent.left = son
+        son.right = father
+        father.parent = son
 
     # Agrega un elemento al 'Tree-Set'
     def add(self, key):
-        if self.contains(key):
+        if self.contains( self.root, key):
             return False
         node = RBNode(key, left=self.NIL, right=self.NIL)
-        y = None
-        x = self.root
+        father = self.NIL
+        son = self.root
 
-        while x != self.NIL:
-            y = x
-            if node.key < x.key:
-                x = x.left
+        while son != self.NIL:
+            father = son
+            if node.key < son.key:
+                son = son.left
             else:
-                x = x.right
+                son = son.right
 
-        node.parent = y
-        if y is None:
+        node.parent = father
+        if father is self.NIL:
             self.root = node
-        elif node.key < y.key:
-            y.left = node
+        elif node.key < father.key:
+            father.left = node
         else:
-            y.right = node
+            father.right = node
 
         node.color = RED
         self._fix_insert(node)
@@ -104,9 +103,10 @@ class TreeSet:
             node = node.right
         return node.key
 
+    # Retorna un valor booleano dependiendo de si encuentra un valor o no
     def contains(self, node, key):
         if node is None:
-            return false
+            return False
         if key==node.key:
             return True
         if node.right is None or node.left is None:
@@ -126,17 +126,17 @@ class TreeSet:
             return
         if node.parent != self.root:
             if node.parent.parent.right.color == RED:           #Caso4a, Caso4b
-                self.recolor(node, "Case1")
+                self.recolor(node, "Case4")
                 self._fix_insert(node.parent.parent)
                 return
             else:
                 if node == node.parent.left:                    #caso5
-                    self._right_rotate(node)
+                    self._right_rotate(node.parent)
                     self.recolor(node, "Case5")
                     return
                 else:
                     self._left_rotate(node)                     #Caso 6
-                    self._right_rotate(node)
+                    self._right_rotate(node.parent)
                     self.recolor(node, "Case5")
                     return
 
@@ -156,9 +156,9 @@ class TreeSet:
             return
         elif case=="Case5":
             node.parent.color=BLACK
-            node.parent.right=RED
+            node.parent.right.color=RED
             return
-
+    #Retorna el tamaño del arbol
     def size(self):
         return self._size
 
