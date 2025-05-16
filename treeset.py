@@ -116,12 +116,55 @@ class TreeSet:
         else:
             return self.contains(node.right, key)
 
+
+    # Arregla un posible incumplimiento de las propiedades del arbol
+    def _fix_insert(self, node):
+        if node.parent is None or node.parent.color == BLACK:       #Caso1, Caso2
+            return
+        if node.parent == self.root and node.parent.color == RED:      #Caso3
+            self.root.color = BLACK
+            return
+        if node.parent != self.root:
+            if node.parent.parent.right.color == RED:           #Caso4a, Caso4b
+                self.recolor(node, "Case1")
+                self._fix_insert(node.parent.parent)
+                return
+            else:
+                if node == node.parent.left:                    #caso5
+                    self._right_rotate(node)
+                    self.recolor(node, "Case5")
+                    return
+                else:
+                    self._left_rotate(node)                     #Caso 6
+                    self._right_rotate(node)
+                    self.recolor(node, "Case5")
+                    return
+
+
+    # Retorna un valor boleano dependiendo si el arbol está vacío
+    def isEmpty(self):
+        if self.root.key is None:
+            return True
+        return False
+
+    # Realiza un recoloreado dependiendo de que caso sea
+    def recolor(self, node, case):
+        if case=="Case1":
+            node.parent.parent.right.color = BLACK  # Tío
+            node.parent.color = BLACK  # Padre
+            node.parent.parent.color = RED  # abuelo
+            return
+        elif case=="Case5":
+            node.parent.color=BLACK
+            node.parent.right=RED
+            return
+
+    def size(self):
+        return self._size
+
+
 # Implementación del TreeSet usando un árbol rojo-negro en python
 '''
-
-
-        def __len__(self):
-            return self.lenght
 
         def  ceiling(self):
             return True
@@ -141,9 +184,6 @@ class TreeSet:
         def higher(self,e):
             return value
 
-        def isEmpty(self):
-            return True
-
         def iterator(self):
             yield
 
@@ -159,7 +199,5 @@ class TreeSet:
         def remove(self, o):
             return True
 
-        def size(self):
-            return size
-  
+
 '''
