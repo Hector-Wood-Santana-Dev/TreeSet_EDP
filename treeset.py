@@ -104,6 +104,18 @@ class TreeSet:
             node = node.right
         return node.key
 
+    def contains(self, node, key):
+        if node is None:
+            return false
+        if key==node.key:
+            return True
+        if node.right is None or node.left is None:
+            return False
+        elif key < node.key:
+            return self.contains(node.left, key)
+        else:
+            return self.contains(node.right, key)
+
 # Implementación del TreeSet usando un árbol rojo-negro en python
 '''
 
@@ -118,9 +130,6 @@ class TreeSet:
             return True
 
         def clone(self):
-            return True
-
-        def contains(self):
             return True
 
         def descendingIterator(self):
