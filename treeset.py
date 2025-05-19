@@ -52,7 +52,7 @@ class TreeSet:
 
     # Agrega un elemento al 'Tree-Set'
     def add(self, key):
-        if self.contains( self.root, key):
+        if self.contains(key):
             return False
         node = RBNode(key, left=self.NIL, right=self.NIL)
         father = self.NIL
@@ -103,19 +103,6 @@ class TreeSet:
             node = node.right
         return node.key
 
-    # Retorna un valor booleano dependiendo de si encuentra un valor o no
-    def contains(self, node, key):
-        if node is None:
-            return False
-        if key==node.key:
-            return True
-        if node.right is None or node.left is None:
-            return False
-        elif key < node.key:
-            return self.contains(node.left, key)
-        else:
-            return self.contains(node.right, key)
-
 
     # Arregla un posible incumplimiento de las propiedades del arbol
     def _fix_insert(self, node):
@@ -143,7 +130,7 @@ class TreeSet:
 
     # Retorna un valor boleano dependiendo si el arbol está vacío
     def isEmpty(self):
-        if self.root.key is None:
+        if self.root == self.NIL:
             return True
         return False
 
@@ -229,9 +216,6 @@ class TreeSet:
                 node = node.right
         return result.key if result else None
 
-    def isEmpty(self):
-        return True
-
     def iterator(self):
         stack = []
         node = self.root
@@ -276,6 +260,3 @@ class TreeSet:
 
     def remove(self, o):
         return True
-
-    def size(self):
-        return self._size
