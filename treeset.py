@@ -105,52 +105,118 @@ class TreeSet:
         return node.key
 
 # Implementación del TreeSet usando un árbol rojo-negro en python
-'''
+    def ceiling(self, e):
+        node = self.root
+        result = None
+        while node != self.NIL:
+            if e == node.key:
+                return node.key
+            if e < node.key:
+                result = node
+                node = node.left
+            else:
+                node = node.right
+        return result.key if result else None
 
+    def clear(self):
+        return True
 
-        def __len__(self):
-            return self.lenght
+    def clone(self):
+        return True
 
-        def  ceiling(self):
-            return True
+    def contains(self, o):
+        node = self.root
+        while node != self.NIL:
+            if o == node.key:
+                return True
+            elif o < node.key:
+                node = node.left
+            else:
+                node = node.right
+        return False
 
-        def clear(self):
-            return True
+    def descendingIterator(self):
+        stack = []
+        node = self.root
+        while stack or node != self.NIL:
+            while node != self.NIL:
+                stack.append(node)
+                node = node.right
+            node = stack.pop()
+            yield node.key
+            node = node.left
 
-        def clone(self):
-            return True
+    def floor(self, e):
+        node = self.root
+        result = None
+        while node != self.NIL:
+            if e == node.key:
+                return node.key
+            if e > node.key:
+                result = node
+                node = node.right
+            else:
+                node = node.left
+        return result.key if result else None
 
-        def contains(self):
-            return True
+    def higher(self, e):
+        node = self.root
+        result = None
+        while node != self.NIL:
+            if e < node.key:
+                result = node
+                node = node.left
+            else:
+                node = node.right
+        return result.key if result else None
 
-        def descendingIterator(self):
-            yield
+    def isEmpty(self):
+        return True
 
-        def floor(self,e):
-            return vakye
+    def iterator(self):
+        stack = []
+        node = self.root
+        while stack or node != self.NIL:
+            while node != self.NIL:
+                stack.append(node)
+                node = node.left
+            node = stack.pop()
+            yield node.key
+            node = node.right
 
-        def higher(self,e):
-            return value
+    def lower(self, e):
+        node = self.root
+        result = None
+        while node != self.NIL:
+            if e > node.key:
+                result = node
+                node = node.right
+            else:
+                node = node.left
+        return result.key if result else None
 
-        def isEmpty(self):
-            return True
+    def pollFirst(self):
+        if self.isEmpty():
+            return None
+        node = self.root
+        while node.left != self.NIL:
+            node = node.left
+        key = node.key
+        self.remove(key)
+        return key
 
-        def iterator(self):
-            yield
+    def pollLast(self):
+        if self.isEmpty():
+            return None
+        node = self.root
+        while node.right != self.NIL:
+            node = node.right
+        key = node.key
+        self.remove(key)
+        return key
 
-        def lower(self):
-            return value
+    def remove(self, o):
+        return True
 
-        def pollFirts(self):
-            return value
-
-        def pollLast(self):
-            return value
-
-        def remove(self, o):
-            return True
-
-        def size(self):
-            return size
-  
-'''
+    def size(self):
+        return self._size
