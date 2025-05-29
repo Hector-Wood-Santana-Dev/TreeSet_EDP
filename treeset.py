@@ -19,6 +19,7 @@ class TreeSet:
         if collection:
             for item in collection:
                 self.add(item)
+
     # Rotación a la izquierda; Único del árbol Rojo-Negro
     def _left_rotate(self, son):
         father = son.right
@@ -53,10 +54,16 @@ class TreeSet:
 
     # Agrega un elemento al 'Tree-Set'
     def add(self, key):
+        if self.type is None:
+            self.type = type(key)
+        elif type(key) != self.type:
+            raise TypeError(f"TreeSet only supports elements of type {self.type.__name__}")
+
         if self.contains(key):
             return False
-        node = RBNode(key, left=self.NIL, right=self.NIL)
-        father = self.NIL
+
+        node = RBNode(key, color=RED, left=self.NIL, right=self.NIL)
+        father = None
         son = self.root
 
         while son != self.NIL:
@@ -67,14 +74,13 @@ class TreeSet:
                 son = son.right
 
         node.parent = father
-        if father is self.NIL:
+        if father is None:
             self.root = node
         elif node.key < father.key:
             father.left = node
         else:
             father.right = node
 
-        node.color = RED
         self._fix_insert(node)
         self._size += 1
         return True
@@ -107,33 +113,41 @@ class TreeSet:
 
     # Arregla un posible incumplimiento de las propiedades del arbol
     def _fix_insert(self, node):
-        if node.parent is None or node.parent.color == BLACK:       #Caso1, Caso2
-            return
-        if node.parent == self.root and node.parent.color == RED:      #Caso3
-            self.root.color = BLACK
-            return
-        if node.parent != self.root:
-            if node.parent.parent.right.color == RED:           #Caso4a, Caso4b
-                self.recolor(node, "Case4")
-                self._fix_insert(node.parent.parent)
-                return
-            else:
-                if node == node.parent.left:                    #caso5
-                    self._right_rotate(node.parent)
-                    self.recolor(node, "Case5")
-                    return
+        while node != self.root and node.parent.color == RED:
+            if node.parent == node.parent.parent.left:
+                uncle = node.parent.parent.right
+                if uncle.color == RED:
+                    node.parent.color = BLACK
+                    uncle.color = BLACK
+                    node.parent.parent.color = RED
+                    node = node.parent.parent
                 else:
-                    self._left_rotate(node)                     #Caso 6
-                    self._right_rotate(node.parent)
-                    self.recolor(node, "Case5")
-                    return
+                    if node == node.parent.right:
+                        node = node.parent
+                        self._left_rotate(node)
+                    node.parent.color = BLACK
+                    node.parent.parent.color = RED
+                    self._right_rotate(node.parent.parent)
+            else:
+                uncle = node.parent.parent.left
+                if uncle.color == RED:
+                    node.parent.color = BLACK
+                    uncle.color = BLACK
+                    node.parent.parent.color = RED
+                    node = node.parent.parent
+                else:
+                    if node == node.parent.left:
+                        node = node.parent
+                        self._right_rotate(node)
+                    node.parent.color = BLACK
+                    node.parent.parent.color = RED
+                    self._left_rotate(node.parent.parent)
+        self.root.color = BLACK
 
 
     # Retorna un valor boleano dependiendo si el arbol está vacío
     def isEmpty(self):
-        if self.root == self.NIL:
-            return True
-        return False
+        return self.root == self.NIL
 
     # Realiza un recoloreado dependiendo de que caso sea
     def recolor(self, node, case):
@@ -146,6 +160,7 @@ class TreeSet:
             node.parent.color=BLACK
             node.parent.right.color=RED
             return
+
     #Retorna el tamaño del arbol
     def size(self):
         return self._size
@@ -168,6 +183,7 @@ class TreeSet:
     def clear(self):
         self.root = self.NIL
         self._size = 0
+        self.type = None
 
     def clone(self):
         return TreeSet(list(self.iterator()))
@@ -229,6 +245,9 @@ class TreeSet:
             yield node.key
             node = node.right
 
+    def __iter__(self):
+        return self.iterator()
+
     def lower(self, e):
         node = self.root
         result = None
@@ -246,7 +265,7 @@ class TreeSet:
         node = self.root
         while node.left != self.NIL:
             node = node.left
-        key = node.key
+        key = self.first()
         self.remove(key)
         return key
 
@@ -256,119 +275,129 @@ class TreeSet:
         node = self.root
         while node.right != self.NIL:
             node = node.right
-        key = node.key
+        key = self.last()
         self.remove(key)
         return key
 
-    def remove(self, k):
-        if type(k) != self.type:
+    def remove(self, key):
+        if self.isEmpty():
             return False
-        node_to_remove = self.find_node(k, self.root)
-        if node_to_remove is None:
+        if self.type is not None and type(key) != self.type:
             return False
-        self.delete_node(node_to_remove)
-        self.size -= 1
+        node = self.find_node(key)
+        if node is None:
+            return False
+        self.delete_node(node)
+        self._size -= 1
+        if self._size == 0:
+            self.type = None
         return True
 
-    def find_node(self, k, current):
-        if type(k) != self.type:
-            return None
-        while current:
-            if k < current.data:
-                current = current.left
-            elif k > current.data:
-                current = current.right
-            else:
+    def find_node(self, k):
+        current = self.root
+        while current != self.NIL:
+            if k == current.key:
                 return current
+            elif k < current.key:
+                current = current.left
+            else:
+                current = current.right
         return None
 
-    def delete_node(self, p):
-        if p.left and p.right:
-            s = self.successor(p)
-            p.data = s.data
-            p = s
-
-        replacement = p.left if p.left else p.right
-
-        if replacement:
-            replacement.parent = p.parent
-            if p.parent is None:
-                self.root = replacement
-            elif p == p.parent.left:
-                p.parent.left = replacement
-            else:
-                p.parent.right = replacement
-            p.left = p.right = p.parent = None
-            if not p.color:
-                self.fix_deletion(replacement)
-        elif p.parent is None:
-            self.root = None
+    def _transplant(self, u, v):
+        if u.parent is None:
+            self.root = v
+        elif u == u.parent.left:
+            u.parent.left = v
         else:
-            if not p.color:
-                self.fix_deletion(p)
+            u.parent.right = v
+        v.parent = u.parent
 
-            if p.parent:
-                if p == p.parent.left:
-                    p.parent.left = None
-                elif p == p.parent.right:
-                    p.parent.right = None
-                p.parent = None
+    def delete_node(self, z):
+        y = z
+        y_original_color = y.color
+        if z.left == self.NIL:
+            x = z.right
+            self._transplant(z, z.right)
+        elif z.right == self.NIL:
+            x = z.left
+            self._transplant(z, z.left)
+        else:
+            y = self.successor(z)
+            y_original_color = y.color
+            x = y.right
+            if y.parent == z:
+                x.parent = y
+            else:
+                self._transplant(y, y.right)
+                y.right = z.right
+                y.right.parent = y
+            self._transplant(z, y)
+            y.left = z.left
+            y.left.parent = y
+            y.color = z.color
+        if y_original_color == BLACK:
+            self.fix_deletion(x)
 
     def fix_deletion(self, x):
-        while x != self.root and (x is None or not x.color):
+        while x != self.root and x.color == BLACK:
             if x == x.parent.left:
-                h = x.parent.right
-                if h and h.color:
-                    h.color = False
-                    x.parent.color = True
+                w = x.parent.right
+                if w.color == RED:
+                    w.color = BLACK
+                    x.parent.color = RED
                     self._left_rotate(x.parent)
-                    h = x.parent.right
-                left_black = h.left is None or not h.left.color
-                right_black = h.right is None or not h.right.color
-                if left_black and right_black:
-                    h.color = True
+                    w = x.parent.right
+                if w.left.color == BLACK and w.right.color == BLACK:
+                    w.color = RED
                     x = x.parent
                 else:
-                    if h.right is None or not h.right.color:
-                        if h.left:
-                            h.left.color = False
-                        h.color = True
-                        self._right_rotate(h)
-                        h = x.parent.right
-                    # Caso 4
-                    h.color = x.parent.color
-                    x.parent.color = False
-                    if h.right:
-                        h.right.color = False
+                    if w.right.color == BLACK:
+                        w.left.color = BLACK
+                        w.color = RED
+                        self._right_rotate(w)
+                        w = x.parent.right
+                    w.color = x.parent.color
+                    x.parent.color = BLACK
+                    w.right.color = BLACK
                     self._left_rotate(x.parent)
                     x = self.root
             else:
-                h = x.parent.left
-                if h and h.color:
-                    h.color = False
-                    x.parent.color = True
+                w = x.parent.left
+                if w.color == RED:
+                    w.color = BLACK
+                    x.parent.color = RED
                     self._right_rotate(x.parent)
-                    h = x.parent.left
-                right_black = h.right is None or not h.right.color
-                left_black = h.left is None or not h.left.color
-                if right_black and left_black:
-                    h.color = True
+                    w = x.parent.left
+                if w.right.color == BLACK and w.left.color == BLACK:
+                    w.color = RED
                     x = x.parent
                 else:
-                    if h.left is None or not h.left.color:
-                        if h.right:
-                            h.right.color = False
-                        h.color = True
-                        self._left_rotate(h)
-                        h = x.parent.left
-                    h.color = x.parent.color
-                    x.parent.color = False
-                    if h.left:
-                        h.left.color = False
+                    if w.left.color == BLACK:
+                        w.right.color = BLACK
+                        w.color = RED
+                        self._left_rotate(w)
+                        w = x.parent.left
+                    w.color = x.parent.color
+                    x.parent.color = BLACK
+                    w.left.color = BLACK
                     self._right_rotate(x.parent)
                     x = self.root
-        if x:
-            x.color = False
+        x.color = BLACK
+
+    # Encuentra el sucesor en orden del nodo dado
+    def successor(self, node):
+        if node.right != self.NIL:
+            current = node.right
+            while current.left != self.NIL:
+                current = current.left
+            return current
+        parent = node.parent
+        while parent is not None and node == parent.right:
+            node = parent
+            parent = parent.parent
+        return parent
+
 
 
 
