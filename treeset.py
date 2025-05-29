@@ -12,6 +12,7 @@ class RBNode:
 
 class TreeSet:
     def __init__(self, collection=None):
+        self.type = None
         self.NIL = RBNode(None, color=BLACK)
         self.root = self.NIL
         self._size = 0
@@ -165,10 +166,11 @@ class TreeSet:
         return result.key if result else None
 
     def clear(self):
-        return True
+        self.root = self.NIL
+        self._size = 0
 
     def clone(self):
-        return True
+        return TreeSet(list(self.iterator()))
 
     def contains(self, o):
         node = self.root
@@ -258,5 +260,121 @@ class TreeSet:
         self.remove(key)
         return key
 
-    def remove(self, o):
+    def remove(self, k):
+        if type(k) != self.type:
+            return False
+        node_to_remove = self.find_node(k, self.root)
+        if node_to_remove is None:
+            return False
+        self.delete_node(node_to_remove)
+        self.size -= 1
         return True
+
+    def find_node(self, k, current):
+        if type(k) != self.type:
+            return None
+        while current:
+            if k < current.data:
+                current = current.left
+            elif k > current.data:
+                current = current.right
+            else:
+                return current
+        return None
+
+    def delete_node(self, p):
+        if p.left and p.right:
+            s = self.successor(p)
+            p.data = s.data
+            p = s
+
+        replacement = p.left if p.left else p.right
+
+        if replacement:
+            replacement.parent = p.parent
+            if p.parent is None:
+                self.root = replacement
+            elif p == p.parent.left:
+                p.parent.left = replacement
+            else:
+                p.parent.right = replacement
+            p.left = p.right = p.parent = None
+            if not p.color:
+                self.fix_deletion(replacement)
+        elif p.parent is None:
+            self.root = None
+        else:
+            if not p.color:
+                self.fix_deletion(p)
+
+            if p.parent:
+                if p == p.parent.left:
+                    p.parent.left = None
+                elif p == p.parent.right:
+                    p.parent.right = None
+                p.parent = None
+
+    def fix_deletion(self, x):
+        while x != self.root and (x is None or not x.color):
+            if x == x.parent.left:
+                h = x.parent.right
+                if h and h.color:
+                    h.color = False
+                    x.parent.color = True
+                    self._left_rotate(x.parent)
+                    h = x.parent.right
+                left_black = h.left is None or not h.left.color
+                right_black = h.right is None or not h.right.color
+                if left_black and right_black:
+                    h.color = True
+                    x = x.parent
+                else:
+                    if h.right is None or not h.right.color:
+                        if h.left:
+                            h.left.color = False
+                        h.color = True
+                        self._right_rotate(h)
+                        h = x.parent.right
+                    # Caso 4
+                    h.color = x.parent.color
+                    x.parent.color = False
+                    if h.right:
+                        h.right.color = False
+                    self._left_rotate(x.parent)
+                    x = self.root
+            else:
+                h = x.parent.left
+                if h and h.color:
+                    h.color = False
+                    x.parent.color = True
+                    self._right_rotate(x.parent)
+                    h = x.parent.left
+                right_black = h.right is None or not h.right.color
+                left_black = h.left is None or not h.left.color
+                if right_black and left_black:
+                    h.color = True
+                    x = x.parent
+                else:
+                    if h.left is None or not h.left.color:
+                        if h.right:
+                            h.right.color = False
+                        h.color = True
+                        self._left_rotate(h)
+                        h = x.parent.left
+                    h.color = x.parent.color
+                    x.parent.color = False
+                    if h.left:
+                        h.left.color = False
+                    self._right_rotate(x.parent)
+                    x = self.root
+        if x:
+            x.color = False
+
+
+
+
+
+
+
+
+
