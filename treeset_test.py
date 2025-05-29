@@ -91,7 +91,57 @@ class TestTreeSet(unittest.TestCase):
         for i in range(1000):
             self.tree_set.add(i)
         self.assertEqual(self.tree_set.size(), 1000)
-    
-    
+
+    def test_floor_ceiling_higher_lower(self):
+        for v in [10, 20, 30, 40, 50]:
+            self.tree_set.add(v)
+
+        self.assertEqual(self.tree_set.floor(25), 20)
+        self.assertEqual(self.tree_set.floor(10), 10)
+        self.assertIsNone(self.tree_set.floor(5))
+
+        self.assertEqual(self.tree_set.ceiling(25), 30)
+        self.assertEqual(self.tree_set.ceiling(50), 50)
+        self.assertIsNone(self.tree_set.ceiling(55))
+
+        self.assertEqual(self.tree_set.higher(25), 30)
+        self.assertEqual(self.tree_set.higher(50), None)
+
+        self.assertEqual(self.tree_set.lower(25), 20)
+        self.assertEqual(self.tree_set.lower(10), None)
+
+    def test_poll_first_and_last(self):
+        for v in [10, 20, 30]:
+            self.tree_set.add(v)
+
+        self.assertEqual(self.tree_set.pollFirst(), 10)
+        self.assertFalse(self.tree_set.contains(10))
+        self.assertEqual(self.tree_set.pollLast(), 30)
+        self.assertFalse(self.tree_set.contains(30))
+
+    def test_clone(self):
+        values = [10, 20, 30]
+        for v in values:
+            self.tree_set.add(v)
+
+        clone_set = self.tree_set.clone()
+        self.assertEqual(list(clone_set), values)
+        self.assertNotEqual(id(self.tree_set), id(clone_set))
+        clone_set.add(40)
+        self.assertFalse(self.tree_set.contains(40))
+
+    def test_type_enforcement(self):
+        self.tree_set.add(10)
+        with self.assertRaises(TypeError):
+            self.tree_set.add("20")
+
+    def test_is_empty_after_many_operations(self):
+        for i in range(500):
+            self.tree_set.add(i)
+        for i in range(500):
+            self.tree_set.remove(i)
+        self.assertTrue(self.tree_set.isEmpty())
+
+
 if __name__ == '__main__':
     unittest.main()
