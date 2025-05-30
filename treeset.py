@@ -1,9 +1,10 @@
-# Implementación del nodo de un árbol rojo-negro en python 
+# Implementación del nodo de un árbol rojo-negro en Python
 RED = True
 BLACK = False
 
 class RBNode:
     def __init__(self, key, color=RED, left=None, right=None, parent=None):
+        # Inicializa un nodo con clave, color, hijos y padre
         self.key = key
         self.color = color
         self.left = left
@@ -12,6 +13,7 @@ class RBNode:
 
 class TreeSet:
     def __init__(self, collection=None):
+        # Inicializa el TreeSet y añade los elementos de la colección opcional
         self.type = None
         self.NIL = RBNode(None, color=BLACK)
         self.root = self.NIL
@@ -20,7 +22,7 @@ class TreeSet:
             for item in collection:
                 self.add(item)
 
-    # Rotación a la izquierda; Único del árbol Rojo-Negro
+    # Realiza una rotación a la izquierda desde el nodo dado
     def _left_rotate(self, son):
         father = son.right
         son.right = father.left
@@ -36,7 +38,7 @@ class TreeSet:
         father.left = son
         son.parent = father
 
-    # Rotación a la derecha; Único del árbol Rojo-Negro
+    # Realiza una rotación a la derecha desde el nodo dado
     def _right_rotate(self, father):
         son = father.left
         father.left = son.right
@@ -52,7 +54,7 @@ class TreeSet:
         son.right = father
         father.parent = son
 
-    # Agrega un elemento al 'Tree-Set'
+    # Agrega un elemento al 'Tree-Set' (si no existe)
     def add(self, key):
         if self.type is None:
             self.type = type(key)
@@ -92,7 +94,7 @@ class TreeSet:
             changed |= self.add(item)
         return changed
 
-    # Retorna el primer elemento
+    # Retorna el primer elemento (mínimo)
     def first(self):
         if self.isEmpty():
             raise ValueError("TreeSet is empty")
@@ -101,7 +103,7 @@ class TreeSet:
             node = node.left
         return node.key
 
-    # Retorna el último elemento
+    # Retorna el último elemento (máximo)
     def last(self):
         if self.isEmpty():
             raise ValueError("TreeSet is empty")
@@ -111,7 +113,7 @@ class TreeSet:
         return node.key
 
 
-    # Arregla un posible incumplimiento de las propiedades del arbol
+    # Reestablece las propiedades del árbol rojo-negro después de una inserción
     def _fix_insert(self, node):
         while node != self.root and node.parent.color == RED:
             if node.parent == node.parent.parent.left:
@@ -145,28 +147,27 @@ class TreeSet:
         self.root.color = BLACK
 
 
-    # Retorna un valor boleano dependiendo si el arbol está vacío
+    # Verifica si el árbol está vacío
     def isEmpty(self):
         return self.root == self.NIL
 
-    # Realiza un recoloreado dependiendo de que caso sea
+    # Recolorea los nodos según el caso de corrección (no utilizada activamente)
     def recolor(self, node, case):
         if case=="Case1":
-            node.parent.parent.right.color = BLACK  # Tío
-            node.parent.color = BLACK  # Padre
-            node.parent.parent.color = RED  # abuelo
+            node.parent.parent.right.color = BLACK
+            node.parent.color = BLACK
+            node.parent.parent.color = RED
             return
         elif case=="Case5":
             node.parent.color=BLACK
             node.parent.right.color=RED
             return
 
-    #Retorna el tamaño del arbol
+    # Devuelve el número de elementos en el TreeSet
     def size(self):
         return self._size
 
-
-# Implementación del TreeSet usando un árbol rojo-negro en python
+    # Devuelve el menor elemento mayor o igual que `e`
     def ceiling(self, e):
         node = self.root
         result = None
@@ -180,14 +181,17 @@ class TreeSet:
                 node = node.right
         return result.key if result else None
 
+    # Elimina todos los elementos del árbol
     def clear(self):
         self.root = self.NIL
         self._size = 0
         self.type = None
 
+    # Retorna una copia del TreeSet
     def clone(self):
         return TreeSet(list(self.iterator()))
 
+    # Verifica si el elemento está en el conjunto
     def contains(self, o):
         node = self.root
         while node != self.NIL:
@@ -199,6 +203,7 @@ class TreeSet:
                 node = node.right
         return False
 
+    # Iterador en orden descendente
     def descendingIterator(self):
         stack = []
         node = self.root
@@ -210,6 +215,7 @@ class TreeSet:
             yield node.key
             node = node.left
 
+    # Devuelve el mayor elemento menor o igual que `e`
     def floor(self, e):
         node = self.root
         result = None
@@ -223,6 +229,7 @@ class TreeSet:
                 node = node.left
         return result.key if result else None
 
+    # Devuelve el menor elemento estrictamente mayor que `e`
     def higher(self, e):
         node = self.root
         result = None
@@ -234,6 +241,7 @@ class TreeSet:
                 node = node.right
         return result.key if result else None
 
+    # Iterador en orden ascendente
     def iterator(self):
         stack = []
         node = self.root
@@ -245,9 +253,11 @@ class TreeSet:
             yield node.key
             node = node.right
 
+    # Permite usar TreeSet en bucles for directamente
     def __iter__(self):
         return self.iterator()
 
+    # Devuelve el mayor elemento estrictamente menor que `e`
     def lower(self, e):
         node = self.root
         result = None
@@ -259,6 +269,7 @@ class TreeSet:
                 node = node.left
         return result.key if result else None
 
+    # Elimina y devuelve el primer elemento (mínimo)
     def pollFirst(self):
         if self.isEmpty():
             return None
@@ -269,6 +280,7 @@ class TreeSet:
         self.remove(key)
         return key
 
+    # Elimina y devuelve el último elemento (máximo)
     def pollLast(self):
         if self.isEmpty():
             return None
@@ -279,6 +291,7 @@ class TreeSet:
         self.remove(key)
         return key
 
+    # Elimina un elemento del árbol (si existe)
     def remove(self, key):
         if self.isEmpty():
             return False
@@ -293,6 +306,7 @@ class TreeSet:
             self.type = None
         return True
 
+    # Encuentra el nodo que contiene la clave dada
     def find_node(self, k):
         current = self.root
         while current != self.NIL:
@@ -304,6 +318,7 @@ class TreeSet:
                 current = current.right
         return None
 
+    # Sustituye un subárbol por otro durante la eliminación
     def _transplant(self, u, v):
         if u.parent is None:
             self.root = v
@@ -313,6 +328,7 @@ class TreeSet:
             u.parent.right = v
         v.parent = u.parent
 
+    # Elimina un nodo del árbol y reestablece las propiedades del árbol rojo-negro
     def delete_node(self, z):
         y = z
         y_original_color = y.color
@@ -339,6 +355,7 @@ class TreeSet:
         if y_original_color == BLACK:
             self.fix_deletion(x)
 
+    # Arregla el árbol si hay violaciones después de una eliminación
     def fix_deletion(self, x):
         while x != self.root and x.color == BLACK:
             if x == x.parent.left:
@@ -385,7 +402,7 @@ class TreeSet:
                     x = self.root
         x.color = BLACK
 
-    # Encuentra el sucesor en orden del nodo dado
+    # Devuelve el sucesor en inorden del nodo dado
     def successor(self, node):
         if node.right != self.NIL:
             current = node.right
